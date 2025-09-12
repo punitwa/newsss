@@ -1,0 +1,15 @@
+# Ignore AWS deployment assets
+aws-deployment/
+
+# Ignore Node.js dependencies
+node_modules/
+
+# Ignore Vite cache
+.vite/
+node_modules/
+
+# Ignore log files
+*.log
+*.log.*
+
+

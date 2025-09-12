@@ -1,0 +1,134 @@
+/* Responsive Utilities */
+
+/* Hide scrollbar for horizontal scrolling containers */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+/* Smooth scrolling for mobile category navigation */
+.scroll-smooth {
+  scroll-behavior: smooth;
+}
+
+/* Mobile navigation specific styles */
+@media (max-width: 768px) {
+  /* Ensure navbar doesn't interfere with viewport on mobile */
+  .mobile-nav-safe {
+    padding-top: env(safe-area-inset-top, 0);
+  }
+  
+  /* Better touch targets for mobile */
+  .mobile-touch-target {
+    min-height: 44px;
+    min-width: 44px;
+    padding: 8px;
+  }
+  
+  /* Prevent zoom on input focus on iOS */
+  input[type="search"] {
+    font-size: 16px !important;
+  }
+  
+  /* Better mobile category scrolling */
+  .category-scroll {
+    -webkit-overflow-scrolling: touch;
+    scroll-snap-type: x proximity;
+  }
+  
+  .category-scroll > * {
+    scroll-snap-align: start;
+  }
+}
+
+/* Touch-friendly button sizes on mobile */
+@media (max-width: 640px) {
+  .touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}
+
+/* Responsive text sizes */
+.text-responsive-sm {
+  @apply text-sm sm:text-base;
+}
+
+.text-responsive-base {
+  @apply text-base sm:text-lg;
+}
+
+.text-responsive-lg {
+  @apply text-lg sm:text-xl;
+}
+
+.text-responsive-xl {
+  @apply text-xl sm:text-2xl;
+}
+
+/* Responsive spacing */
+.space-responsive {
+  @apply space-y-4 sm:space-y-6 lg:space-y-8;
+}
+
+.gap-responsive {
+  @apply gap-4 sm:gap-6 lg:gap-8;
+}
+
+.p-responsive {
+  @apply p-4 sm:p-6 lg:p-8;
+}
+
+.px-responsive {
+  @apply px-4 sm:px-6 lg:px-8;
+}
+
+.py-responsive {
+  @apply py-4 sm:py-6 lg:py-8;
+}
+
+/* Mobile-first container */
+.container-responsive {
+  @apply mx-auto px-4 sm:px-6 lg:px-8 max-w-7xl;
+}
+
+/* Responsive grid layouts */
+.grid-responsive-cards {
+  @apply grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6;
+}
+
+.grid-responsive-sidebar {
+  @apply grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8;
+}
+
+/* Mobile navigation helpers */
+.nav-mobile-hidden {
+  @apply hidden md:flex;
+}
+
+.nav-mobile-only {
+  @apply md:hidden;
+}
+
+/* Responsive image containers */
+.image-responsive {
+  @apply w-full h-40 sm:h-48 lg:h-56 object-cover rounded-lg;
+}
+
+/* Safe area for mobile devices with notches */
+.safe-area-top {
+  padding-top: env(safe-area-inset-top);
+}
+
+.safe-area-bottom {
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+/* Focus states for accessibility */
+.focus-visible-ring {
+  @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2;
+}

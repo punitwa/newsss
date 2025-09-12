@@ -1,0 +1,228 @@
+# News Aggregator Configuration
+
+# Environment settings
+environment: development
+log_level: info
+
+# Server configuration
+server:
+  address: ":8080"
+  read_timeout: 30
+  write_timeout: 30
+  idle_timeout: 120
+
+# Database configuration
+database:
+  host: localhost
+  port: 5432
+  user: postgres
+  password: postgres
+  database: news_aggregator
+  ssl_mode: disable
+  max_conns: 25
+  max_idle_conns: 5
+  max_lifetime: 300
+
+# Redis configuration
+redis:
+  address: "redis:6379"
+  password: ""
+  db: 0
+  pool_size: 10
+
+# RabbitMQ configuration
+rabbitmq:
+  url: "amqp://guest:guest@rabbitmq:5672/"
+  exchange: "news_exchange"
+  queue_prefix: "news"
+  prefetch_count: 10
+
+# Elasticsearch configuration
+elasticsearch:
+  addresses:
+    - "http://elasticsearch:9200"
+  username: ""
+  password: ""
+  index: "news_articles"
+
+# Rate limiting configuration
+rate_limit:
+  requests_per_minute: 100
+  burst_size: 10
+  cleanup_interval: "1m"
+
+# JWT configuration
+jwt:
+  secret_key: "your-secret-key-change-in-production"
+  expiration_time: "24h"
+  issuer: "news-aggregator"
+
+# Metrics configuration
+metrics:
+  enabled: true
+  port: ":9090"
+  path: "/metrics"
+
+# News sources configuration
+sources:
+  - name: "BBC News RSS"
+    type: "rss"
+    url: "http://feeds.bbci.co.uk/news/rss.xml"
+    schedule: "30s"
+    rate_limit: 10
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+  - name: "BBC World News"
+    type: "rss"
+    url: "http://feeds.bbci.co.uk/news/world/rss.xml"
+    schedule: "30s"
+    rate_limit: 10
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+  - name: "BBC Technology News"
+    type: "rss"
+    url: "http://feeds.bbci.co.uk/news/technology/rss.xml"
+    schedule: "30s"
+    rate_limit: 10
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+  - name: "BBC Business News"
+    type: "rss"
+    url: "http://feeds.bbci.co.uk/news/business/rss.xml"
+    schedule: "30s"
+    rate_limit: 10
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+
+  - name: "TechCrunch RSS"
+    type: "rss"
+    url: "https://techcrunch.com/feed/"
+    schedule: "30s"
+    rate_limit: 8
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+  - name: "CNN Top Stories"
+    type: "rss"
+    url: "http://rss.cnn.com/rss/edition.rss"
+    schedule: "30s"
+    rate_limit: 10
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+  - name: "Hindustan Times"
+    type: "rss"
+    url: "https://www.hindustantimes.com/feeds/rss/news/rssfeed.xml"
+    schedule: "30s"
+    rate_limit: 8
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+  - name: "The Hindu"
+    type: "rss"
+    url: "https://www.thehindu.com/feeder/default.rss"
+    schedule: "30s"
+    rate_limit: 8
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+  - name: "Times of India"
+    type: "rss"
+    url: "https://timesofindia.indiatimes.com/rssfeedstopstories.cms"
+    schedule: "30s"
+    rate_limit: 8
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+  - name: "NDTV Sports"
+    type: "rss"
+    url: "https://feeds.feedburner.com/ndtvsports-latest"
+    schedule: "30s"
+    rate_limit: 8
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+  - name: "Live Hindustan"
+    type: "rss"
+    url: "https://www.livehindustan.com/rss/all"
+    schedule: "45s"
+    rate_limit: 8
+    headers:
+      User-Agent: "NewsAggregator/1.0"
+    enabled: true
+
+# Enhanced Top Stories Algorithm Configuration
+top_stories:
+  # Scoring weights (must sum to 1.0)
+  scoring_weights:
+    engagement_weight: 0.25    # User engagement (clicks, views, time spent)
+    credibility_weight: 0.30   # Source credibility and reliability
+    content_weight: 0.20       # NLP-based content importance
+    social_weight: 0.15        # Social media engagement
+    recency_weight: 0.10       # How recent the article is
+
+  # Category balancing for diversity
+  category_balance:
+    min_categories: 3          # Minimum different categories in top stories
+    max_per_category: 2        # Maximum articles per category
+    required_categories:       # Categories that should always be represented
+      - "technology"
+      - "business"
+      - "world"
+    category_weights:          # Boost certain categories
+      technology: 1.1
+      business: 1.0
+      politics: 1.0
+      sports: 0.9
+      entertainment: 0.8
+
+  # Quality thresholds
+  min_score: 0.3              # Minimum score for top stories consideration
+  max_age: "24h"              # Maximum age of articles to consider
+  refresh_interval: "15m"     # How often to recalculate top stories
+
+# Content analysis settings
+content_analysis:
+  enabled: true
+  min_content_length: 100     # Minimum content length for analysis
+  keyword_extraction_limit: 10
+  entity_extraction_enabled: true
+  sentiment_analysis_enabled: true
+  importance_threshold: 0.4
+
+# Social media integration
+social_media:
+  enabled: true
+  platforms:
+    - twitter
+    - facebook
+    - reddit
+    - linkedin
+  fetch_interval: "6h"        # How often to fetch social metrics
+  timeout: "30s"              # API timeout
+  rate_limit: 100             # Requests per hour per platform
+
+# Engagement tracking
+engagement_tracking:
+  enabled: true
+  track_views: true
+  track_clicks: true
+  track_shares: true
+  track_read_time: true
+  session_timeout: "30m"
+
+  
