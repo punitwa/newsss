@@ -1,0 +1,33 @@
+# --- Build stage ---
+FROM node:20-alpine AS builder
+
+WORKDIR /app
+
+# Install all deps (incl. dev) to allow Vite build
+COPY news-react-modern/package*.json ./
+RUN npm ci
+
+# Copy source
+COPY news-react-modern/ ./
+
+# Optional: allow overriding API base at build time if your code reads it
+ARG VITE_API_BASE_URL
+ENV VITE_API_BASE_URL=${VITE_API_BASE_URL}
+
+# Build
+RUN npm run build
+
+# --- Runtime stage ---
+FROM nginx:alpine
+
+# Use provided Nginx config (serves / and static files)
+COPY aws-deployment/nginx.conf /etc/nginx/conf.d/default.conf
+
+# App static assets
+COPY --from=builder /app/dist /usr/share/nginx/html
+
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost/ || exit 1
+
+EXPOSE 80
+CMD ["nginx", "-g", "daemon off;"]

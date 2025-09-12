@@ -1,0 +1,149 @@
+version: '3.8'
+
+services:
+  postgres:
+    image: postgres:15-alpine
+    container_name: worldbrief_postgres
+    environment:
+      POSTGRES_DB: news_aggregator
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: SecurePassword123!
+      POSTGRES_INITDB_ARGS: "--encoding=UTF-8 --lc-collate=C --lc-ctype=C"
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./scripts/init.sql:/docker-entrypoint-initdb.d/init.sql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - worldbrief
+
+  redis:
+    image: redis:7-alpine
+    container_name: worldbrief_redis
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    command: redis-server --maxmemory 64mb --maxmemory-policy allkeys-lru
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - worldbrief
+
+  rabbitmq:
+    image: rabbitmq:3-management-alpine
+    container_name: worldbrief_rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: admin
+      RABBITMQ_DEFAULT_PASS: SecurePassword123!
+    ports:
+      - "5672:5672"
+      - "15672:15672"
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    restart: unless-stopped
+    networks:
+      - worldbrief
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:8.13.4
+    container_name: worldbrief_elasticsearch
+    environment:
+      - discovery.type=single-node
+      - xpack.security.enabled=false
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
+    ports:
+      - "9200:9200"
+    volumes:
+      - es_data:/usr/share/elasticsearch/data
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:9200 >/dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 10
+    restart: unless-stopped
+    networks:
+      - worldbrief
+
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile.api-gateway
+    container_name: worldbrief_api_gateway
+    environment:
+      ENVIRONMENT: production
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: news_aggregator
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: SecurePassword123!
+      REDIS_ADDRESS: redis:6379
+      RABBITMQ_URL: amqp://admin:SecurePassword123!@rabbitmq:5672/
+      LOG_LEVEL: info
+      MAX_WORKERS: 2
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    restart: unless-stopped
+    networks:
+      - worldbrief
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: worldbrief_frontend
+    networks:
+      - worldbrief
+    volumes:
+      - frontend_build:/usr/share/nginx/html
+    depends_on:
+      - api-gateway
+    restart: unless-stopped
+
+  nginx:
+    image: nginx:alpine
+    container_name: worldbrief_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - frontend_build:/usr/share/nginx/html
+      - ./nginx_conf:/etc/nginx/conf.d
+    depends_on:
+      - frontend
+      - api-gateway
+    networks:
+      - worldbrief
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+  redis_data:
+  rabbitmq_data:
+  es_data:
+  frontend_build:
+
+networks:
+  worldbrief:
+    driver: bridge
