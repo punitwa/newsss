@@ -1,7 +1,13 @@
 import axios from 'axios';
 import { NewsResponse, CategoriesResponse, SearchResponse, News } from '@/types/news';
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_API || '/api/v1';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
+
+
+// Debug logging to see what the environment variable resolves to
+console.log('VITE_API_BASE_API env var:', import.meta.env.VITE_API_BASE_API);
+console.log('Final API_BASE_URL:', API_BASE_URL);
+
 
 const api = axios.create({
   baseURL: API_BASE_URL,

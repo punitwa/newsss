@@ -108,11 +108,18 @@ services:
     restart: unless-stopped
     networks:
       - worldbrief
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
   frontend:
     build:
       context: .
       dockerfile: Dockerfile.frontend
+      args:
+        VITE_API_BASE_API: /api/v1
     container_name: worldbrief_frontend
     networks:
       - worldbrief
@@ -136,6 +143,77 @@ services:
     networks:
       - worldbrief
     restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Data Collector
+  data-collector:
+    build:
+      context: .
+      dockerfile: Dockerfile.data-collector
+    container_name: worldbrief_data_collector
+    environment:
+      ENVIRONMENT: production
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: news_aggregator
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: SecurePassword123!
+      REDIS_ADDRESS: redis:6379
+      RABBITMQ_URL: amqp://admin:SecurePassword123!@rabbitmq:5672/
+      ELASTICSEARCH_ADDRESSES: http://elasticsearch:9200
+      LOG_LEVEL: info
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - worldbrief
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+  # Processor
+  processor:
+    build:
+      context: .
+      dockerfile: Dockerfile.processor
+    container_name: worldbrief_processor
+    environment:
+      ENVIRONMENT: production
+      DATABASE_HOST: postgres
+      DATABASE_PORT: 5432
+      DATABASE_NAME: news_aggregator
+      DATABASE_USER: postgres
+      DATABASE_PASSWORD: SecurePassword123!
+      REDIS_ADDRESS: redis:6379
+      RABBITMQ_URL: amqp://admin:SecurePassword123!@rabbitmq:5672/
+      ELASTICSEARCH_ADDRESSES: http://elasticsearch:9200
+      LOG_LEVEL: info
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    networks:
+      - worldbrief
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
 
 volumes:
   postgres_data:
@@ -147,3 +225,4 @@ volumes:
 networks:
   worldbrief:
     driver: bridge
+
