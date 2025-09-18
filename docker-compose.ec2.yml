@@ -134,6 +134,7 @@ services:
     container_name: worldbrief_nginx
     ports:
       - "80:80"
+      - "443:443"
     volumes:
       - frontend_build:/usr/share/nginx/html
       - ./nginx_conf:/etc/nginx/conf.d
